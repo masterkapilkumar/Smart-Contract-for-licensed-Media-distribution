@@ -259,6 +259,20 @@ contract Spotify
     	return ansList;
   	}
 
+  	function mediaAvailableOnPlatform() view public returns (bytes32[])
+  	{
+  		//Creator Can only call this!
+  		require(personalInfoList[msg.sender].typeCustomer==3);
+  		bytes32[] memory ansList=new bytes32[](mediaList.length);
+  		uint counterVar=0;
+  		for(uint i = 0; i < mediaList.length; i++) 
+  		{
+      			ansList[counterVar]=(mediaList[i].NameOfMedia);
+      			counterVar+=1;
+    	}
+    	return ansList;
+  	}
+
   	function getPersonalInformation(address currAddress) view public returns(uint,bytes32[],bytes32[])
   	{
   		return(personalInfoList[currAddress].typeCustomer,personalInfoList[currAddress].BoughtMediaName,
