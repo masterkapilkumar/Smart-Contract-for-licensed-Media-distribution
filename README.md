@@ -23,5 +23,5 @@ will add the encrypted url in the contract (assume creator to be honest). Now, f
 
 6.The revenue obtained from the media license (by the creator) should be divided among other stakeholders(eg. Production company) of the media. (Number of stakeholders can range from 0 to maximum of 5). The creator should be able to specify the stakeholders and corresponding share of each stakeholder while creating the media entry. The division of revenue (generated from each media license buying / selling) among the stakeholders should happen on-chain by a contract function.
 
-**distributeMoney() is the function which distributes revenue in accordance with shares. The shares need to be specified by creator while creating media. We have taken shares for any media to be 1000. So revenue is distributed at 0.1% precision. This distribution happens online.**
+**distributeMoney() is the function which distributes revenue in accordance with shares. The shares need to be specified by creator while creating media. We have taken shares for any media to be 1000. So revenue is distributed at 0.1% precision. This distribution happens onchain as required.**
 
