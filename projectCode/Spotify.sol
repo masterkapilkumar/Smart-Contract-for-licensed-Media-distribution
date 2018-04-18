@@ -2,6 +2,10 @@ pragma solidity ^0.4.18; //We have to specify what version of the compiler this 
 
 contract Spotify
 {
+
+	//make this indexed? Why?
+	event Status(uint statusCode);
+
 	struct media
 	{
 		bytes32 NameOfMedia;
@@ -82,6 +86,12 @@ contract Spotify
 
 	function assignRole(uint assignedType,address currAddress) public
 	{
+		// if(msg.sender!=ownerAddress)
+		// {
+		// 	emit Status(101);
+		// 	//You are not the owner who can assign roles! Back Off dude!
+		// 	return;
+		// }
 		require(msg.sender==ownerAddress);
 		personalInfoList[currAddress].typeCustomer=assignedType;
 
@@ -175,12 +185,25 @@ contract Spotify
 
   		uint amountPaid=msg.value;
   		//send exact amount, don't want no tips!
-  		uint costForBuyer=mediaList[mediaIndex].individualCost;
+  		uint costForBuyer=mediaList[mediaIndex].individualCost*(10**18);
   		if(buyerType==2)
   		{
-  			costForBuyer=mediaList[mediaIndex].CompanyCost;
+  			costForBuyer=mediaList[mediaIndex].CompanyCost*(10**18);
   		}
-  		// require(costForBuyer==amountPaid);
+  		require(costForBuyer<=amountPaid);
+  		// if(costForBuyer>amountPaid)
+  		// {
+  		// 	emit Status(102);//Paid Less Money, You Thief!
+  		// }
+  		// if(costForBuyer==amountPaid)
+  		// {
+  		// 	emit Status(103);//Paid Equal Money! -_-
+  		// }
+  		// if(costForBuyer<amountPaid)
+  		// {
+  		// 	emit Status(104);//Paid More Money! You Richie Rich! :)
+  		// }
+
   		
   		distributeMoney(mediaWantToBuy);
 

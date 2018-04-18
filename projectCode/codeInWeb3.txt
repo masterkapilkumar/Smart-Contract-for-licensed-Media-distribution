@@ -41,12 +41,13 @@ contractInstance.getType(web3.eth.accounts[7],{from:web3.eth.accounts[0],gas:900
 contractInstance.getType(web3.eth.accounts[8],{from:web3.eth.accounts[0],gas:900000}).toLocaleString()
 contractInstance.getType(web3.eth.accounts[9],{from:web3.eth.accounts[0],gas:900000}).toLocaleString()
 
-//try to change my Role Unsuccessfully!
+//try to change my Role Unsuccessfully! Do i get an Error Code?
 contractInstance.assignRole(1,web3.eth.accounts[9],{from:web3.eth.accounts[9],gas:900000})
 
 // 1 creates a song individually and another with 2 and 3
 contractInstance.createMedia([],[],"song1",2,1,{from:web3.eth.accounts[1],gas: 900000})
 contractInstance.createMedia([web3.eth.accounts[2],web3.eth.accounts[3]],[200,400],"song2",2,1,{from:web3.eth.accounts[1],gas: 900000})
+contractInstance.createMedia([web3.eth.accounts[2]],[500],"song3",3,2.5,{from:web3.eth.accounts[1],gas: 900000})
 
 
 // show media available to buy for individual and company
@@ -59,6 +60,7 @@ contractInstance.mediaAvailableToBuy(web3.eth.accounts[1],{from:web3.eth.account
 // show Media Information
 contractInstance.getMediaInformation('song1',{from:web3.eth.accounts[6],gas: 900000})
 contractInstance.getMediaInformation('song2',{from:web3.eth.accounts[6],gas: 900000})
+contractInstance.getMediaInformation('song3',{from:web3.eth.accounts[6],gas: 900000})
 
 
 // show Account Information
@@ -71,6 +73,48 @@ web3.fromWei(web3.eth.getBalance(web3.eth.accounts[6])).toLocaleString()
 
 // try to buy
 contractInstance.buyMedia('song1',{from:web3.eth.accounts[6],value:web3.toWei('1', 'ether'),gas: 900000})
+
+//Check Balance if they changed for individual cost
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[6])).toLocaleString()
+
+
+//Check Balance
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
+
+// try to buy
+contractInstance.buyMedia('song1',{from:web3.eth.accounts[9],value:web3.toWei('1', 'ether'),gas: 900000})
+
+//Check Balance if they changed for Company
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
+
+
+//Check Balance
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
+
+// try to buy
+contractInstance.buyMedia('song1',{from:web3.eth.accounts[9],value:web3.toWei('1', 'ether'),gas: 900000})
+
+//Check Balance if they changed for Company
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
+
+//Check Balance
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[5])).toLocaleString()
+
+// try to buy
+contractInstance.buyMedia('song3',{from:web3.eth.accounts[5],value:web3.toWei('2.5', 'ether'),gas: 900000})
+
+//Check Balance if they changed fractionally
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[5])).toLocaleString()
+
 
 
 
