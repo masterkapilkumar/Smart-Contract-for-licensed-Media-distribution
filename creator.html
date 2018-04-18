@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Smart Contract for Licensed Media</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+	<link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+
+	<script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="scripts/index.js"></script>
+	<script>
+		$(document).ready(function() {
+			$("#CR_user_num").text(window.location.search.substr(6));
+		});
+		connect();
+		
+		
+		window.onload = function () { 
+			display_information(parseInt(window.location.search.substr(6)));
+		}
+	</script>
+  
+</head>
+<body class="container">
+	<div id="creator_body">
+		<h3><b>Creator <label id="CR_user_num">null</label></b></h3>
+		<span id="logged_in"></span><br /><br />
+		<h4><b>Account Information:</label></b></h3>
+		Balance: <span id="balance"></span><br />
+		Media created: <span id="media_data">None</span>
+		<br /><br />
+		<div>
+			<h4><b>Create Media:</b></h4>
+			<div>
+				<b>Name: </b><input type="text" placeholder="Media Name" id="media_name"><br>
+				<b>Individual Cost: </b><input type="text" placeholder="Amount" id="indiv_cost"><br>
+				<b>Company Cost: </b><input type="text" placeholder="Amount" id="company_cost">
+			</div>
+
+			<br>
+			<a href="#" onclick="create_media()" class="btn btn-primary" id="create_media_button">Create Media</a>
+			<a href="#" onclick="create_stakeholder_field()" class="btn btn-primary" id="add_stake">Add Stakeholder</a>
+			<br>
+		</div>
+	  </div>
+	<br>
+	
+	  
+</body>
+
+
+</html>
