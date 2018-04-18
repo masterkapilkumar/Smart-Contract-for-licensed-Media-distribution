@@ -19,6 +19,24 @@ contract Spotify
 		mapping (address => bytes32) encryptedurlforpurchasers;
 	}
 
+	modifier creatorOnly() 
+	{
+		require(personalInfoList[msg.sender].typeCustomer == 3);
+		_;
+	}
+
+	modifier consumerOnly() 
+	{
+		require(personalInfoList[msg.sender].typeCustomer == 2 || personalInfoList[msg.sender].typeCustomer == 1);
+		_;
+	}
+
+	modifier contractCreatorOnly() 
+	{
+		require(msg.sender == ownerAddress);
+		_;
+	}
+
 	struct personalInfo
 	{
 		uint typeCustomer;	// 3 for Creator,1 for individual and 2 for Company
@@ -30,6 +48,7 @@ contract Spotify
 	media[] public mediaList;	// List of Information
 	mapping (address => personalInfo) public personalInfoList;	// mapping of personalInfo struct which stores type of customer and list of her purchased media 
 	mapping (bytes32 => uint) public indexOfMedia;	// index of a Media in the List
+	mapping (bytes32 => bool) public doesMediaExists;
 	mapping (address => bytes32) public publicKeyHash;	// hash for getting publicKeyHash from address of a person
 	
 
@@ -38,21 +57,16 @@ contract Spotify
 		publicKeyHash[msg.sender]=myPubKey;
 	}
 
+	function doesMediaExistsFunc(bytes32 mediaName) view public returns (bool)
+	{
+		return doesMediaExists[mediaName];
+	}
 	
 
-	function creatorAddPurchasedURL(bytes32 purEncryptUrl, bytes32 nameMedia, address purchaser) public
+	function creatorAddPurchasedURL(bytes32 purEncryptUrl, bytes32 nameMedia, address purchaser) public creatorOnly
 	{
 		//Check if Media with this name exists
-  		uint mediaExists=(100);
-  		for(uint k=0;k< mediaList.length;k++)
-  		{
-  			if(mediaList[k].NameOfMedia==nameMedia)
-  			{
-  				mediaExists=1;
-  				break;
-  			}
-  		}
-  		require(mediaExists==(1));
+		require(doesMediaExistsFunc(nameMedia)==true);
 
 		//check if msg.sender is creator!
 		require(mediaList[indexOfMedia[nameMedia]].stakeHolders[0]==msg.sender);
@@ -62,7 +76,7 @@ contract Spotify
 
 	}
 
-	function assignRole(uint assignedType,address currAddress) public
+	function assignRole(uint assignedType,address currAddress) public contractCreatorOnly
 	{
 		// if(msg.sender!=ownerAddress)
 		// {
@@ -75,14 +89,19 @@ contract Spotify
 
 	} 
 
+	//Constructor
 	function Spotify(uint totalSharesForAnyMedia) public 
 	{
     	totalShares = totalSharesForAnyMedia;
     	ownerAddress=msg.sender;
   	}
 
-  	function createMedia(address[] stakeHoldersAddresses,uint[] stakeHoldersShares, bytes32 mediaName, uint compCost, uint indCost,bytes32 encryptedURLwithCreatorPublicKeyArg) public
+  	function createMedia(address[] stakeHoldersAddresses,uint[] stakeHoldersShares, 
+  		bytes32 mediaName, uint compCost, uint indCost,
+  		bytes32 encryptedURLwithCreatorPublicKeyArg) public creatorOnly
   	{
+  		//Such a Media Name should not exist
+  		require(doesMediaExistsFunc(mediaName)==false);
   		//length should be the same obviously!
   		require(stakeHoldersAddresses.length==stakeHoldersShares.length);
   		//length should be less than 5 as mentioned in assignment statement
@@ -95,10 +114,6 @@ contract Spotify
     	}
     	// creator can't have negative shares
     	require(sharesOfOtherUsers <= totalShares);
-    	// fooStruct myStruct = fooStruct({foo:1, fighter:2});
-    	uint creatorType=getType(msg.sender);
-  		//creator can only create!
-  		require(creatorType==3);
     	//make Stake Numbers List
     	uint[] memory sharesPerPersonTemp= new uint[]((stakeHoldersShares.length+1));
     	sharesPerPersonTemp[0]=(totalShares-sharesOfOtherUsers);
@@ -117,27 +132,17 @@ contract Spotify
     	 stakeHolders:stakeHoldersAddressesTemp, sharesPerPerson: sharesPerPersonTemp, encryptedURLwithCreatorPublicKey:encryptedURLwithCreatorPublicKeyArg });
 
     	indexOfMedia[mediaName]=mediaList.length;
-
+    	doesMediaExists[mediaName]=true;
     	mediaList.push(myStruct);
   	}
 
-  	function buyMedia(bytes32 mediaWantToBuy) payable public
+  	function buyMedia(bytes32 mediaWantToBuy) payable public consumerOnly
   	{
   		//msg.sender wants to buy
   		
   		//Check if Media with this name exists
-  		uint mediaExists=(100);
-  		for(uint k=0;k< mediaList.length;k++)
-  		{
-  			if(mediaList[k].NameOfMedia==mediaWantToBuy)
-  			{
-  				mediaExists=1;
-  				break;
-  			}
-  		}
-  		require(mediaExists==(1));
-
-
+  		require(doesMediaExistsFunc(mediaWantToBuy)==true);
+  		
   		//Check if already Bought??
   		uint foundInBought=(100);
   		bytes32[] memory alreadyBoughtMedia=personalInfoList[msg.sender].BoughtMediaName;
@@ -151,45 +156,23 @@ contract Spotify
   		}
   		require(foundInBought==(100));
 
-  		
-
   		uint buyerType=getType(msg.sender);
-  		//buyer should be a consumer
-  		require(buyerType!=3);
-
-
 
   		uint mediaIndex= indexOfMedia[mediaWantToBuy];
 
-
   		uint amountPaid=msg.value;
-  		//send exact amount, don't want no tips!
   		uint costForBuyer=mediaList[mediaIndex].individualCost*(10**18);
   		if(buyerType==2)
   		{
   			costForBuyer=mediaList[mediaIndex].CompanyCost*(10**18);
   		}
   		require(costForBuyer<=amountPaid);
-  		// if(costForBuyer>amountPaid)
-  		// {
-  		// 	emit Status(102);//Paid Less Money, You Thief!
-  		// }
-  		// if(costForBuyer==amountPaid)
-  		// {
-  		// 	emit Status(103);//Paid Equal Money! -_-
-  		// }
-  		// if(costForBuyer<amountPaid)
-  		// {
-  		// 	emit Status(104);//Paid More Money! You Richie Rich! :)
-  		// }
-
   		
   		distributeMoney(mediaWantToBuy);
 
   		emit wantsToBuy(mediaWantToBuy, mediaList[indexOfMedia[mediaWantToBuy]].stakeHolders[0], msg.sender);
   		
   		personalInfoList[msg.sender].BoughtMediaName.push(mediaWantToBuy);
-
   	}
 
   	function distributeMoney(bytes32 mediaName) public 
@@ -243,10 +226,9 @@ contract Spotify
     	return ansList;
   	}
 
-  	function mediaAvailableOnPlatform() view public returns (bytes32[])
+  	function mediaAvailableOnPlatform() view public creatorOnly returns (bytes32[])
   	{
-  		//Creator Can only call this!
-  		require(personalInfoList[msg.sender].typeCustomer==3);
+  		//Creators only can call this!
   		bytes32[] memory ansList=new bytes32[](mediaList.length);
   		uint counterVar=0;
   		for(uint i = 0; i < mediaList.length; i++) 
@@ -264,17 +246,8 @@ contract Spotify
 
   	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],bytes32 )
   	{
-  		//Check if Media with this name exists
-  		uint mediaExists=(100);
-  		for(uint k=0;k< mediaList.length;k++)
-  		{
-  			if(mediaList[k].NameOfMedia==currName)
-  			{
-  				mediaExists=1;
-  				break;
-  			}
-  		}
-  		require(mediaExists==(1));
+  		//media Should Exist!
+  		require(doesMediaExistsFunc(currName)==true);
 
   		uint indexC=indexOfMedia[currName];
   		return (mediaList[indexC].NameOfMedia,mediaList[indexC].individualCost,mediaList[indexC].CompanyCost,
@@ -310,17 +283,7 @@ contract Spotify
   	function getMyPurchasedMediaURL(bytes32 mediaName) view public returns (bytes32)
 	{
 		//Check if Media with this name exists
-  		uint mediaExists=(100);
-  		for(uint k=0;k< mediaList.length;k++)
-  		{
-  			if(mediaList[k].NameOfMedia==mediaName)
-  			{
-  				mediaExists=1;
-  				break;
-  			}
-  		}
-  		require(mediaExists==(1));
-
+  		require(doesMediaExistsFunc(mediaName)==true);
 		return mediaList[indexOfMedia[mediaName]].encryptedurlforpurchasers[msg.sender];
 	}
 
