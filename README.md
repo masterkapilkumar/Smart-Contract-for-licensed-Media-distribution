@@ -18,4 +18,9 @@
 4. The consumers should be able to view all the media entries available to buy. Whenever a consumer wants to buy some media, consumer should initiate a transaction, and contract should internally invoke a function to transfer the license amount to creator (and stakeholders discussed later). You should ensure that the amount paid for the license depends upon the type of consumer.The payment should be in Ether. (You would get to know how to add ether as you go
 through the tutorials)
 
-**Consumer can see media available to buy using function mediaAvailableToBuy(). The amount paid depends on the type of consumer and this check is also implemented in buyMedia() function where he/she can specify which media they wish to buy. They need to pay atleast as much amount as specified and can also send more money (as tip :p )**
+**Consumer can see media available to buy using function mediaAvailableToBuy(). The amount paid depends on the type of consumer and this check is also implemented in buyMedia() function where he/she can specify which media they wish to buy. They need to pay atleast as much amount as specified and can also send more money (as tip :p ). A function called distributeMoney() is made which transfers amounts to share holders accordingly. In case less money is sent, all the money is reverted back to sender and he isn't able to buy**
+
+5. Whenever a consumer buys any media, creator should create a new encrypted url (encrypted using consumers public key ) of the media. Encryption can’t be done on-chain. You have to find a method to do encryption/decryption off-chain. The creator
+will add the encrypted url in the contract (assume creator to be honest). Now, for a consumer to access the media, he needs to decrypt the url and use it. Once paid for a particular media, a buy option should not appear for the consumer anymore, for that media.
+
+**More about this soon**
