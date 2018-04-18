@@ -6,6 +6,8 @@ contract Spotify
 	//make this indexed? Why?
 	event Status(uint statusCode);
 
+	event wantsToBuy(bytes32 mediaName, address creator, address consumer);
+
 	struct media
 	{
 		bytes32 NameOfMedia;
@@ -13,77 +15,52 @@ contract Spotify
 		uint CompanyCost;
 		address[] stakeHolders; //creator is the stake holder at zero index
 		uint[] sharesPerPerson;
-		bytes32 encryptedUrl;
-		mapping (address => bytes32) urlforpurchasers;
-	}
-
-	function bytesToAddr (bytes b) constant returns (address) 
-	{
-	  uint result = 0;
-	  for (uint i = b.length-1; i+1 > 0; i--) {
-	    uint c = uint(b[i]);
-	    uint to_inc = c * ( 16 ** ((b.length - i-1) * 2));
-	    result += to_inc;
-	  }
-	  return address(result);
-	}
-
-
-	//Taken from ethereum.stackexchange
-  	function toBytes(address a) constant public returns (bytes b)
-  	{
-   		assembly 
-   		{
-	        let m := mload(0x40)
-	        mstore(add(m, 20), xor(0x140000000000000000000000000000000000000000, a))
-	        mstore(0x40, add(m, 52))
-	        b := m
-	    }
-	}
-
-	function bytes32ToBytes(bytes32 data) internal pure returns (bytes) 
-	{
-	    uint i = 0;
-	    while (i < 32 && uint(data[i]) != 0) 
-	    {
-	        ++i;
-	    }
-	    bytes memory result = new bytes(i);
-	    i = 0;
-	    while (i < 32 && data[i] != 0) 
-	    {
-	        result[i] = data[i];
-	        ++i;
-	    }
-	    return result;
-	}
-
-
-  	//This function is taken from "https://ethereum.stackexchange.com/questions/8346/convert-address-to-string"
-  	function toString(address x) public returns (string) 
-  	{
-	    bytes memory b = new bytes(20);
-	    for (uint i = 0; i < 20; i++)
-	        b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
-	    return string(b);
+		bytes32 encryptedURLwithCreatorPublicKey;
+		mapping (address => bytes32) encryptedurlforpurchasers;
 	}
 
 	struct personalInfo
 	{
 		uint typeCustomer;	// 3 for Creator,1 for individual and 2 for Company
 		bytes32[] BoughtMediaName;
-		bytes32[] BoughtMediaEncryptedUrl;
 	}
 
-	uint public totalShares; //represents total shares of any media
-
-
-    address ownerAddress;
-
-	media[] public mediaList;
-	mapping (address => personalInfo) public personalInfoList;
-	mapping (bytes32 => uint) public indexOfMedia;
+	uint public totalShares; // represents total shares of any media
+    address ownerAddress;	// One who deployed this contract
+	media[] public mediaList;	// List of Information
+	mapping (address => personalInfo) public personalInfoList;	// mapping of personalInfo struct which stores type of customer and list of her purchased media 
+	mapping (bytes32 => uint) public indexOfMedia;	// index of a Media in the List
+	mapping (address => bytes32) public publicKeyHash;	// hash for getting publicKeyHash from address of a person
 	
+
+	function addMyPublicKey(bytes32 myPubKey) public 
+	{
+		publicKeyHash[msg.sender]=myPubKey;
+	}
+
+	
+
+	function creatorAddPurchasedURL(bytes32 purEncryptUrl, bytes32 nameMedia, address purchaser) public
+	{
+		//Check if Media with this name exists
+  		uint mediaExists=(100);
+  		for(uint k=0;k< mediaList.length;k++)
+  		{
+  			if(mediaList[k].NameOfMedia==nameMedia)
+  			{
+  				mediaExists=1;
+  				break;
+  			}
+  		}
+  		require(mediaExists==(1));
+
+		//check if msg.sender is creator!
+		require(mediaList[indexOfMedia[nameMedia]].stakeHolders[0]==msg.sender);
+
+		//send the media!
+		mediaList[indexOfMedia[nameMedia]].encryptedurlforpurchasers[purchaser]=purEncryptUrl;
+
+	}
 
 	function assignRole(uint assignedType,address currAddress) public
 	{
@@ -104,9 +81,12 @@ contract Spotify
     	ownerAddress=msg.sender;
   	}
 
-
-  	function createMedia(address[] stakeHoldersAddresses,uint[] stakeHoldersShares, bytes32 mediaName, uint compCost, uint indCost) public
+  	function createMedia(address[] stakeHoldersAddresses,uint[] stakeHoldersShares, bytes32 mediaName, uint compCost, uint indCost,bytes32 encryptedURLwithCreatorPublicKeyArg) public
   	{
+  		//length should be the same obviously!
+  		require(stakeHoldersAddresses.length==stakeHoldersShares.length);
+  		//length should be less than 5 as mentioned in assignment statement
+  		require(stakeHoldersAddresses.length<6);
 
   		uint sharesOfOtherUsers = 0;
   		for(uint i = 0; i < stakeHoldersShares.length; i++) 
@@ -115,21 +95,17 @@ contract Spotify
     	}
     	// creator can't have negative shares
     	require(sharesOfOtherUsers <= totalShares);
-
     	// fooStruct myStruct = fooStruct({foo:1, fighter:2});
     	uint creatorType=getType(msg.sender);
   		//creator can only create!
   		require(creatorType==3);
-
     	//make Stake Numbers List
     	uint[] memory sharesPerPersonTemp= new uint[]((stakeHoldersShares.length+1));
     	sharesPerPersonTemp[0]=(totalShares-sharesOfOtherUsers);
-    	
     	for(uint j = 0; j < stakeHoldersShares.length; j++) 
   		{
   			sharesPerPersonTemp[j+1]=(stakeHoldersShares[j]);
     	}
-
     	//Make Stake Holder Address List
     	address[] memory stakeHoldersAddressesTemp= new address[]((stakeHoldersShares.length+1));
     	stakeHoldersAddressesTemp[0]=(msg.sender);
@@ -137,22 +113,31 @@ contract Spotify
   		{
   			stakeHoldersAddressesTemp[k+1]=(stakeHoldersAddresses[k]);
     	}
-
-    	//todo: Use Public Key
     	media memory myStruct = media({NameOfMedia:mediaName, individualCost:indCost,CompanyCost:compCost ,
-    	 stakeHolders:stakeHoldersAddressesTemp, sharesPerPerson: sharesPerPersonTemp, encryptedUrl:mediaName });
+    	 stakeHolders:stakeHoldersAddressesTemp, sharesPerPerson: sharesPerPersonTemp, encryptedURLwithCreatorPublicKey:encryptedURLwithCreatorPublicKeyArg });
 
     	indexOfMedia[mediaName]=mediaList.length;
 
     	mediaList.push(myStruct);
   	}
 
-  	
-
   	function buyMedia(bytes32 mediaWantToBuy) payable public
   	{
   		//msg.sender wants to buy
   		
+  		//Check if Media with this name exists
+  		uint mediaExists=(100);
+  		for(uint k=0;k< mediaList.length;k++)
+  		{
+  			if(mediaList[k].NameOfMedia==mediaWantToBuy)
+  			{
+  				mediaExists=1;
+  				break;
+  			}
+  		}
+  		require(mediaExists==(1));
+
+
   		//Check if already Bought??
   		uint foundInBought=(100);
   		bytes32[] memory alreadyBoughtMedia=personalInfoList[msg.sender].BoughtMediaName;
@@ -166,17 +151,7 @@ contract Spotify
   		}
   		require(foundInBought==(100));
 
-  		//Check if Media with this name exists
-  		uint mediaExists=(100);
-  		for(uint k=0;k< mediaList.length;k++)
-  		{
-  			if(mediaList[k].NameOfMedia==mediaWantToBuy)
-  			{
-  				mediaExists=1;
-  				break;
-  			}
-  		}
-  		require(mediaExists==(1));
+  		
 
   		uint buyerType=getType(msg.sender);
   		//buyer should be a consumer
@@ -211,11 +186,11 @@ contract Spotify
   		
   		distributeMoney(mediaWantToBuy);
 
+  		emit wantsToBuy(mediaWantToBuy, mediaList[indexOfMedia[mediaWantToBuy]].stakeHolders[0], msg.sender);
+  		
   		personalInfoList[msg.sender].BoughtMediaName.push(mediaWantToBuy);
-  		//todo: Change This and get by adding a function
-  		personalInfoList[msg.sender].BoughtMediaEncryptedUrl.push(mediaList[mediaIndex].encryptedUrl);
-  	}
 
+  	}
 
   	function distributeMoney(bytes32 mediaName) public 
   	{
@@ -232,6 +207,11 @@ contract Spotify
   		}
   		mediaList[mediaIndex].stakeHolders[0].transfer(moneyLeft);
   	}
+
+  	function getPublicKey(address currAddr) view public returns (bytes32)
+	{
+		return publicKeyHash[currAddr];
+	}
 
   	function mediaAvailableToBuy() view public returns (bytes32[])
   	{
@@ -277,13 +257,12 @@ contract Spotify
     	return ansList;
   	}
 
-  	function getPersonalInformation() view public returns(uint,bytes32[],bytes32[])
+  	function getPersonalInformation() view public returns(uint,bytes32[])
   	{
-  		return(personalInfoList[msg.sender].typeCustomer,personalInfoList[msg.sender].BoughtMediaName,
-  			personalInfoList[msg.sender].BoughtMediaEncryptedUrl);
+  		return(personalInfoList[msg.sender].typeCustomer,personalInfoList[msg.sender].BoughtMediaName);
   	}
 
-  	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],bytes32 encryptedUrl)
+  	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],bytes32 )
   	{
   		//Check if Media with this name exists
   		uint mediaExists=(100);
@@ -299,7 +278,7 @@ contract Spotify
 
   		uint indexC=indexOfMedia[currName];
   		return (mediaList[indexC].NameOfMedia,mediaList[indexC].individualCost,mediaList[indexC].CompanyCost,
-  			mediaList[indexC].stakeHolders,mediaList[indexC].sharesPerPerson,mediaList[indexC].encryptedUrl);
+  			mediaList[indexC].stakeHolders,mediaList[indexC].sharesPerPerson,mediaList[indexC].encryptedURLwithCreatorPublicKey);
   	}
 
   	function showBoughtMedia() view public returns (bytes32[])
@@ -327,5 +306,22 @@ contract Spotify
   	{
     	return (indexOfMedia[mediaName]);
   	}
+
+  	function getMyPurchasedMediaURL(bytes32 mediaName) view public returns (bytes32)
+	{
+		//Check if Media with this name exists
+  		uint mediaExists=(100);
+  		for(uint k=0;k< mediaList.length;k++)
+  		{
+  			if(mediaList[k].NameOfMedia==mediaName)
+  			{
+  				mediaExists=1;
+  				break;
+  			}
+  		}
+  		require(mediaExists==(1));
+
+		return mediaList[indexOfMedia[mediaName]].encryptedurlforpurchasers[msg.sender];
+	}
 
 }
