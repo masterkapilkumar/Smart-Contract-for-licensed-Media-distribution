@@ -2,6 +2,9 @@
 ## For Running Code
 Soldity contract named Spotify is in **projectCode/Spotify.sol**.  
 Unit tests were run on Nodejs Command line, tests are provided in **projectCode/codeInWeb3.txt**.
+Deploying constructor takes a uint as argument which is basically total number of shares in a song.  
+Creator is put at zero index in the shareHolders List of a Song.  
+Shares of Creator are kept so as to make total shares sum as 1000.  
 
 
 ## Assignment Information
