@@ -10,7 +10,7 @@ Unit tests were run on Nodejs Command line, tests are provided in **projectCode/
 
 1. Every user in the contract can act as a Creator or a Consumer.Two types of consumers are available: Individual or Company (You can randomly choose a consumer to be an Individual consumer or a Company ). Only creator should be able to add an entry for the licensed media.
 
-**Any User can only be This is implemented in our code using assignRole() function and this role assignment can only be done by the deployer of the contract. In real life, he may get requests and assign roles to users accordingly.Yes, A require check has been written in createMedia function for checking that only creator can add media.**
+**Any User can only be This is implemented in our code using assignRole() function and this role assignment can only be done by the deployer of the contract. In real life, he may get requests and assign roles to users accordingly.Yes, A Modifier check has been written in createMedia function for checking that only creator can add media.**
 
 3. A creator should be able to add a licensed media to the contract (You have to come up with an appropriate data structure to represent a media in the contract.). The exact url of media should not be added to the contract. The creator should also set the cost for the media license for individual and Company as consumers.The media or media url is not accessible by the consumers until they pay for the license.
 
