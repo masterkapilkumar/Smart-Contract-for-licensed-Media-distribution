@@ -14,6 +14,7 @@ contract Spotify
 		address[] stakeHolders; //creator is the stake holder at zero index
 		uint[] sharesPerPerson;
 		bytes32 encryptedUrl;
+		mapping (address => bytes32) urlforpurchasers;
 	}
 
 	function bytesToAddr (bytes b) constant returns (address) 
@@ -232,22 +233,22 @@ contract Spotify
   		mediaList[mediaIndex].stakeHolders[0].transfer(moneyLeft);
   	}
 
-  	function mediaAvailableToBuy(address currAddress) view public returns (bytes32[])
+  	function mediaAvailableToBuy() view public returns (bytes32[])
   	{
   		//Creator Can't Buy Anything
-  		if(personalInfoList[currAddress].typeCustomer==3)
+  		if(personalInfoList[msg.sender].typeCustomer==3)
   		{
   			bytes32[] memory ansListEmpty;
   			return ansListEmpty;
   		}
-  		bytes32[] memory ansList=new bytes32[](mediaList.length-personalInfoList[currAddress].BoughtMediaName.length);
+  		bytes32[] memory ansList=new bytes32[](mediaList.length-personalInfoList[msg.sender].BoughtMediaName.length);
   		uint counterVar=0;
   		for(uint i = 0; i < mediaList.length; i++) 
   		{
   			uint found=(100);
-      		for(uint j=0;j< personalInfoList[currAddress].BoughtMediaName.length;j++)
+      		for(uint j=0;j< personalInfoList[msg.sender].BoughtMediaName.length;j++)
       		{
-      			if(personalInfoList[currAddress].BoughtMediaName[j]==mediaList[i].NameOfMedia)
+      			if(personalInfoList[msg.sender].BoughtMediaName[j]==mediaList[i].NameOfMedia)
       			{
       				found=1;
       				break;
@@ -262,7 +263,7 @@ contract Spotify
     	return ansList;
   	}
 
-  	function mediaAvailableOnPlatform(address currAddress) view public returns (bytes32[])
+  	function mediaAvailableOnPlatform() view public returns (bytes32[])
   	{
   		//Creator Can only call this!
   		require(personalInfoList[msg.sender].typeCustomer==3);
@@ -276,10 +277,10 @@ contract Spotify
     	return ansList;
   	}
 
-  	function getPersonalInformation(address currAddress) view public returns(uint,bytes32[],bytes32[])
+  	function getPersonalInformation() view public returns(uint,bytes32[],bytes32[])
   	{
-  		return(personalInfoList[currAddress].typeCustomer,personalInfoList[currAddress].BoughtMediaName,
-  			personalInfoList[currAddress].BoughtMediaEncryptedUrl);
+  		return(personalInfoList[msg.sender].typeCustomer,personalInfoList[msg.sender].BoughtMediaName,
+  			personalInfoList[msg.sender].BoughtMediaEncryptedUrl);
   	}
 
   	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],bytes32 encryptedUrl)
@@ -301,15 +302,15 @@ contract Spotify
   			mediaList[indexC].stakeHolders,mediaList[indexC].sharesPerPerson,mediaList[indexC].encryptedUrl);
   	}
 
-  	function showBoughtMedia(address currAddress) view public returns (bytes32[])
+  	function showBoughtMedia() view public returns (bytes32[])
   	{
   		//Creator Can't Buy Anything
-  		if(personalInfoList[currAddress].typeCustomer==3)
+  		if(personalInfoList[msg.sender].typeCustomer==3)
   		{
   			bytes32[] memory ansList;
   			return ansList;
   		}
-  		return personalInfoList[currAddress].BoughtMediaName;
+  		return personalInfoList[msg.sender].BoughtMediaName;
   	}
 
   	function getTypeSender() view public returns (uint)
