@@ -7,10 +7,7 @@ compiledCode = solc.compile(code)
 abiDefinition = JSON.parse(compiledCode.contracts[':Spotify'].interface)
 SpotifyContract = web3.eth.contract(abiDefinition)
 byteCode = compiledCode.contracts[':Spotify'].bytecode
-
 deployedContract = SpotifyContract.new( 1000 ,{data: byteCode, from: web3.eth.accounts[0], gas: 4700000})
-
-
 deployedContract.address
 contractInstance = SpotifyContract.at(deployedContract.address)
 
@@ -41,21 +38,25 @@ contractInstance.getType(web3.eth.accounts[7],{from:web3.eth.accounts[0],gas:900
 contractInstance.getType(web3.eth.accounts[8],{from:web3.eth.accounts[0],gas:900000}).toLocaleString()
 contractInstance.getType(web3.eth.accounts[9],{from:web3.eth.accounts[0],gas:900000}).toLocaleString()
 
-//try to change my Role Unsuccessfully! Do i get an Error Code?
+//try to change my Role Unsuccessfully! 
 contractInstance.assignRole(1,web3.eth.accounts[9],{from:web3.eth.accounts[9],gas:900000})
 
+//try to create Media by Consumer, It should get reverted
+contractInstance.createMedia([],[],"song1",2,1,"song1EncryptedByCreator",{from:web3.eth.accounts[9],gas: 900000})
+
+
 // 1 creates a song individually and another with 2 and 3
-contractInstance.createMedia([],[],"song1",2,1,{from:web3.eth.accounts[1],gas: 900000})
-contractInstance.createMedia([web3.eth.accounts[2],web3.eth.accounts[3]],[200,400],"song2",2,1,{from:web3.eth.accounts[1],gas: 900000})
-contractInstance.createMedia([web3.eth.accounts[2]],[500],"song3",3,2.5,{from:web3.eth.accounts[1],gas: 900000})
+contractInstance.createMedia([],[],"song1",2,1,"song1EncryptedByCreator",{from:web3.eth.accounts[1],gas: 900000})
+contractInstance.createMedia([web3.eth.accounts[2],web3.eth.accounts[3]],[200,400],"song2",2,1,"song2EncryptedByCreator",{from:web3.eth.accounts[1],gas: 900000})
+contractInstance.createMedia([web3.eth.accounts[2]],[500],"song3",3,2.5,"song3EncryptedByCreator",{from:web3.eth.accounts[1],gas: 900000})
 
 
 // show media available to buy for individual and company
-contractInstance.mediaAvailableToBuy(web3.eth.accounts[7],{from:web3.eth.accounts[7],gas: 900000})
-contractInstance.mediaAvailableToBuy(web3.eth.accounts[8],{from:web3.eth.accounts[8],gas: 900000})
+contractInstance.mediaAvailableToBuy({from:web3.eth.accounts[7],gas: 900000})
+contractInstance.mediaAvailableToBuy({from:web3.eth.accounts[8],gas: 900000})
 
 // show media available to buy for Creator- It should be none
-contractInstance.mediaAvailableToBuy(web3.eth.accounts[1],{from:web3.eth.accounts[1],gas: 900000})
+contractInstance.mediaAvailableToBuy({from:web3.eth.accounts[1],gas: 900000})
 
 // show Media Information
 contractInstance.getMediaInformation('song1',{from:web3.eth.accounts[6],gas: 900000})
@@ -63,28 +64,48 @@ contractInstance.getMediaInformation('song2',{from:web3.eth.accounts[6],gas: 900
 contractInstance.getMediaInformation('song3',{from:web3.eth.accounts[6],gas: 900000})
 
 
+// show media info of song which is never created- It should fail
+contractInstance.getMediaInformation('song100',{from:web3.eth.accounts[6],gas: 900000})
+
+
 // show Account Information
-contractInstance.getPersonalInformation(web3.eth.accounts[6],{from:web3.eth.accounts[6],gas: 900000})
-contractInstance.getPersonalInformation(web3.eth.accounts[9],{from:web3.eth.accounts[9],gas: 900000})
+contractInstance.getPersonalInformation({from:web3.eth.accounts[6],gas: 900000}).toString()
+contractInstance.getPersonalInformation({from:web3.eth.accounts[9],gas: 900000}).toString()
 
 //Check Balance
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[6])).toLocaleString()
 
-// try to buy
+// try to buy with less money! It should fail
+contractInstance.buyMedia('song1',{from:web3.eth.accounts[6],value:web3.toWei('0.5', 'ether'),gas: 900000})
+
+// try to buy with equal money!
 contractInstance.buyMedia('song1',{from:web3.eth.accounts[6],value:web3.toWei('1', 'ether'),gas: 900000})
 
-//Check Balance if they changed for individual cost
+// try to buy already bought media! It should fail!
+contractInstance.buyMedia('song1',{from:web3.eth.accounts[6],value:web3.toWei('1', 'ether'),gas: 900000})
+
+// try to buy media never created! It should fail!
+contractInstance.buyMedia('song100',{from:web3.eth.accounts[6],value:web3.toWei('1', 'ether'),gas: 900000})
+
+// try to see my purchased media!
+contractInstance.showBoughtMedia({from:web3.eth.accounts[6],gas: 900000})
+
+//Check Balance if they changed according to individual cost
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[6])).toLocaleString()
 
 
+
 //Check Balance
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
 
-// try to buy
+// try to buy at individual cost - It should fail
 contractInstance.buyMedia('song1',{from:web3.eth.accounts[9],value:web3.toWei('1', 'ether'),gas: 900000})
+
+// try to buy at Company cost with success!
+contractInstance.buyMedia('song1',{from:web3.eth.accounts[9],value:web3.toWei('2', 'ether'),gas: 900000})
 
 //Check Balance if they changed for Company
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
@@ -94,36 +115,58 @@ web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
 //Check Balance
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[3])).toLocaleString()
 
-// try to buy
-contractInstance.buyMedia('song1',{from:web3.eth.accounts[9],value:web3.toWei('1', 'ether'),gas: 900000})
+// buy successfully
+contractInstance.buyMedia('song2',{from:web3.eth.accounts[9],value:web3.toWei('2', 'ether'),gas: 900000})
 
-//Check Balance if they changed for Company
+// see if fractional costs got updated, it should have
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[9])).toLocaleString()
-
-//Check Balance
-web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
 web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])).toLocaleString()
-web3.fromWei(web3.eth.getBalance(web3.eth.accounts[5])).toLocaleString()
-
-// try to buy
-contractInstance.buyMedia('song3',{from:web3.eth.accounts[5],value:web3.toWei('2.5', 'ether'),gas: 900000})
-
-//Check Balance if they changed fractionally
-web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])).toLocaleString()
-web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])).toLocaleString()
-web3.fromWei(web3.eth.getBalance(web3.eth.accounts[5])).toLocaleString()
+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[3])).toLocaleString()
 
 
 
+// See my purchased media and media available to buy!
+contractInstance.showBoughtMedia({from:web3.eth.accounts[6],gas: 900000})
+contractInstance.showBoughtMedia({from:web3.eth.accounts[9],gas: 900000})
+contractInstance.mediaAvailableToBuy({from:web3.eth.accounts[9],gas: 900000})
+
+// See Media on Platform, only creator can see! 1st will fail and second will pass
+contractInstance.mediaAvailableOnPlatform({from:web3.eth.accounts[9],gas: 900000})
+contractInstance.mediaAvailableOnPlatform({from:web3.eth.accounts[1],gas: 900000})
 
 
+//set my own public key
+contractInstance.addMyPublicKey('pk1',{from:web3.eth.accounts[1],gas: 900000})
 
-// function createMedia(
-// 	address[] stakeHoldersAddresses,
-// 	uint[] stakeHoldersShares, 
-// 	bytes32 mediaName,
-// 	 uint compCost,
-// 	 uint indCost) 
+
+//some one tries to get this key
+tempVar=contractInstance.getPublicKey(web3.eth.accounts[1],{from:web3.eth.accounts[8],gas: 900000})
+web3.toAscii(tempVar)
+
+
+// show Account Information: See that bought media is also correct!
+contractInstance.getPersonalInformation({from:web3.eth.accounts[6],gas: 900000}).toString()
+contractInstance.getPersonalInformation({from:web3.eth.accounts[9],gas: 900000}).toString()
+
+//Check which all media exists!
+contractInstance.doesMediaExistsFunc('song1')
+contractInstance.doesMediaExistsFunc('song100')
+
+//Some One else tries to edit purchased encrypted url -- Should fail
+contractInstance.creatorAddPurchasedURL('song1URLfor9','song1',web3.eth.accounts[9],{from:web3.eth.accounts[9],gas: 900000})
+
+//Creator adds encrypted URL successfully!
+contractInstance.creatorAddPurchasedURL('song1URLfor9','song1',web3.eth.accounts[9],{from:web3.eth.accounts[1],gas: 900000})
+
+//Buyer tries to get this media, only buyer can decrypt it offchain!
+tempVar=contractInstance.getMyPurchasedMediaURL('song1',{from:web3.eth.accounts[9],gas: 900000})
+web3.toAscii(tempVar)
+
+// fails for a media not in the system as it should!
+contractInstance.getMyPurchasedMediaURL('song100',{from:web3.eth.accounts[9],gas: 900000})
+
 
