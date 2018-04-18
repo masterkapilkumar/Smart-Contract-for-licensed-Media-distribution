@@ -259,7 +259,7 @@ contract Spotify
     	return ansList;
   	}
 
-  	function mediaAvailableOnPlatform() view public returns (bytes32[])
+  	function mediaAvailableOnPlatform(address currAddress) view public returns (bytes32[])
   	{
   		//Creator Can only call this!
   		require(personalInfoList[msg.sender].typeCustomer==3);
