@@ -31,16 +31,16 @@ will add the encrypted url in the contract (assume creator to be honest). Now, f
 **distributeMoney() is the function which distributes revenue in accordance with shares. The shares need to be specified by creator while creating media. We have taken shares for any media to be 1000. So revenue is distributed at 0.1% precision. This distribution happens onchain as required.**
 
 ## Some Things Learnt
-Making a variable as memory or storage; memory variable disappear. Also we need to set the size of a memory variable beforehand  
-We can't initialize more than around 10 variables in a function as it starts giving stack too deep errors which can be removed using more functions  
-Usage of Pure, View  
-Usage of Public,Private  
-Usage of Modifiers makes checks better readable  
-Require reverts the function fully! Even in a payable function, its like a transaction in a database  
-mapping's aren't iterable  
-events can be thrown for debugging and can be listened using some console.log() or by Javascript  
-We need to add gas for each function calling using web3js  
-Running "node_modules/.bin/ganache-cli" on one terminal runs a server, we get 10 unlocked accounts with 100 ethers each  
-using "node" on another terminal, we can make a web3 object which can listen to that port   
-msg.value gives money in Some lower unit(perhaps finney), which is 10^18 times an ether  
-
+- Making a variable as memory or storage; memory variable disappear. Also we need to set the size of a memory variable beforehand  
+- We can't initialize more than around 10 variables in a function as it starts giving stack too deep errors which can be removed using more functions  
+- Usage of Pure, View  
+- Usage of Public,Private  
+- Usage of Modifiers makes checks better readable  
+- Require reverts the function fully! Even in a payable function, its like a transaction in a database  
+- mapping aren't iterable  
+- events can be thrown for debugging and can be listened using some console.log() or by Javascript  
+- We need to add gas for each function calling using web3js  
+- Running "node_modules/.bin/ganache-cli" on one terminal runs a server, we get 10 unlocked accounts with 100 ethers each  
+- using "node" on another terminal, we can make a web3 object which can listen to that port   
+- msg.value gives money in Some lower unit(perhaps finney), which is 10^18 times an ether  
+- Cant return a string of lists in Solidity, yet
