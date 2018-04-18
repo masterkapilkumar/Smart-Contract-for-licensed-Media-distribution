@@ -7,3 +7,6 @@
 
 **Any User can only be This is implemented in our code using assignRole() function and this role assignment can only be done by the deployer of the contract. In real life, he may get requests and assign roles to users accordingly.**
 
+2. Only creator should be able to add an entry for the licensed media.
+
+**Yes, A require check has been written in createMedia function**
