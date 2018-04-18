@@ -116,7 +116,10 @@ contract Spotify
     	require(sharesOfOtherUsers <= totalShares);
 
     	// fooStruct myStruct = fooStruct({foo:1, fighter:2});
-    	
+    	uint creatorType=getType(msg.sender);
+  		//creator can only create!
+  		require(creatorType==3);
+
     	//make Stake Numbers List
     	uint[] memory sharesPerPersonTemp= new uint[]((stakeHoldersShares.length+1));
     	sharesPerPersonTemp[0]=(totalShares-sharesOfOtherUsers);
