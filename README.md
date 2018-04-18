@@ -47,3 +47,4 @@ will add the encrypted url in the contract (assume creator to be honest). Now, f
 - using "node" on another terminal, we can make a web3 object which can listen to that port   
 - msg.value gives money in Some lower unit(perhaps finney), which is 10^18 times an ether  
 - Cant return a string of lists in Solidity, yet
+- web3.toAscii() is helpful in reading byte32 Strings 
