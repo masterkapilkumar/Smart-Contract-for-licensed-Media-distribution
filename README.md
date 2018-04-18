@@ -1,5 +1,9 @@
 # Smart-Contract-for-licensed-Media-distribution
+## Running Code
+Soldity contract named Spotify is in **projectCode/Spotify.sol**.  
+Unit tests were run on Nodejs Command line, tests are provided in **projectCode/codeInWeb3.txt**.
 
+## Assignment Information
 **The above code can be run on ganache local server and can also be deployed to testnet. The backend is fully secure and can be deployed as a smart contract considering the honest Creators.** 
 
 
