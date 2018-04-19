@@ -6,7 +6,6 @@ var web3;
 var total_stakeholders = 0;
 var user_types = {}
 var private_keys = []
-var public_keys = []
 
 function connect() {
 	web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -46,7 +45,8 @@ function connect() {
 	private_keys[9] = new bitcore.PrivateKey('324717001660251b8bcb028b21e11a0038f07e0ab26419fe8b4034bfd3123409');
 	
 	for(var i=0; i<10; i++) {
-		public_keys[i] = bitcore.PublicKey(private_keys[i])
+		public_key = bitcore.PublicKey(private_keys[i]).toString();
+		contractInstance.addMyPublicKey(public_key,{from:web3.eth.accounts[i],gas: 900000})
 	}
 	
 	$('#status').css({"color":"green"});
@@ -90,7 +90,8 @@ function initListeners() {
 			// console.log(accounts.indexOf(creator) + "\n"+accounts.indexOf(consumer)+'\n'+private_keys[accounts.indexOf(creator)]+'\n'+urlBuffer+'\n'+encrypted_url);
 			var decrypted_url = ecies().privateKey(private_keys[accounts.indexOf(creator)]).decrypt(urlBuffer);
 			// console.log(decrypted_url.toString('ascii'));
-			encrypted_url = ecies().privateKey(private_keys[accounts.indexOf(consumer)]).publicKey(public_keys[accounts.indexOf(consumer)]).encrypt(decrypted_url);
+			var public_key = contractInstance.getPublicKey(consumer,{from:creator,gas: 900000})
+			encrypted_url = ecies().privateKey(private_keys[accounts.indexOf(consumer)]).publicKey(new bitcore.PublicKey(web3.toAscii(public_key))).encrypt(decrypted_url);
 			encrypted_url = encrypted_url.toString('hex');
 			console.log(encrypted_url);
 			
@@ -193,8 +194,9 @@ function create_media() {
 	var company_cost = $("#company_cost").val();
 	var url = $('#url').val();
 	// url_buffer= new bitcore.deps.Buffer(url, 'hex');
-	
-	var encrypted_url = ecies().privateKey(private_keys[currentAccount]).publicKey(public_keys[currentAccount]).encrypt(url);
+	var public_key = contractInstance.getPublicKey(web3.eth.accounts[currentAccount],{from:web3.eth.accounts[currentAccount],gas: 900000})
+	console.log(web3.toAscii(public_key))
+	var encrypted_url = ecies().privateKey(private_keys[currentAccount]).publicKey(new bitcore.PublicKey(web3.toAscii(public_key))).encrypt(url);
 	encrypted_url = encrypted_url.toString('hex');
 	console.log(encrypted_url);
 	
