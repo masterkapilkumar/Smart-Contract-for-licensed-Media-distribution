@@ -15,8 +15,8 @@ contract Spotify
 		uint CompanyCost;
 		address[] stakeHolders; //creator is the stake holder at zero index
 		uint[] sharesPerPerson;
-		bytes32 encryptedURLwithCreatorPublicKey;
-		mapping (address => bytes32) encryptedurlforpurchasers;
+		string encryptedURLwithCreatorPublicKey;
+		mapping (address => string) encryptedurlforpurchasers;
 	}
 
 	modifier creatorOnly() 
@@ -63,7 +63,7 @@ contract Spotify
 	}
 	
 
-	function creatorAddPurchasedURL(bytes32 purEncryptUrl, bytes32 nameMedia, address purchaser) public creatorOnly
+	function creatorAddPurchasedURL(string purEncryptUrl, bytes32 nameMedia, address purchaser) public creatorOnly
 	{
 		//Check if Media with this name exists
 		require(doesMediaExistsFunc(nameMedia)==true);
@@ -98,7 +98,7 @@ contract Spotify
 
   	function createMedia(address[] stakeHoldersAddresses,uint[] stakeHoldersShares, 
   		bytes32 mediaName, uint compCost, uint indCost,
-  		bytes32 encryptedURLwithCreatorPublicKeyArg) public creatorOnly
+  		string encryptedURLwithCreatorPublicKeyArg) public creatorOnly
   	{
   		//Such a Media Name should not exist
   		require(doesMediaExistsFunc(mediaName)==false);
@@ -244,7 +244,7 @@ contract Spotify
   		return(personalInfoList[msg.sender].typeCustomer,personalInfoList[msg.sender].BoughtMediaName);
   	}
 
-  	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],bytes32 )
+  	function getMediaInformation(bytes32 currName) view public returns(bytes32,uint,uint,address[],uint[],string )
   	{
   		//media Should Exist!
   		require(doesMediaExistsFunc(currName)==true);
@@ -280,7 +280,7 @@ contract Spotify
     	return (indexOfMedia[mediaName]);
   	}
 
-  	function getMyPurchasedMediaURL(bytes32 mediaName) view public returns (bytes32)
+  	function getMyPurchasedMediaURL(bytes32 mediaName) view public returns (string)
 	{
 		//Check if Media with this name exists
   		require(doesMediaExistsFunc(mediaName)==true);
