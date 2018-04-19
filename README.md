@@ -7,6 +7,23 @@ Creator is put at zero index in the shareHolders List of a Song.
 Shares of Creator are kept so as to make total shares sum as 1000.  
 
 
+## Lines to be run on Web3 before starting UI  
+Web3 = require('web3')  
+web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));  
+web3.eth.accounts  
+code = fs.readFileSync('projectCode/Spotify.sol').toString()  
+solc = require('solc')  
+compiledCode = solc.compile(code)  
+abiDefinition = JSON.parse(compiledCode.contracts[':Spotify'].interface)  
+SpotifyContract = web3.eth.contract(abiDefinition)  
+byteCode = compiledCode.contracts[':Spotify'].bytecode  
+deployedContract = SpotifyContract.new( 1000 ,{data: byteCode, from: web3.eth.accounts[0], gas: 4700000})  
+deployedContract.address  
+contractInstance = SpotifyContract.at(deployedContract.address)  
+
+
+
+
 ## Assignment Information
 **The above code can be run on ganache local server and can also be deployed to testnet. The backend is fully secure and can be deployed as a smart contract considering the honest Creators.** 
 
@@ -27,7 +44,7 @@ through the tutorials)
 5. Whenever a consumer buys any media, creator should create a new encrypted url (encrypted using consumers public key ) of the media. Encryption can’t be done on-chain. You have to find a method to do encryption/decryption off-chain. The creator
 will add the encrypted url in the contract (assume creator to be honest). Now, for a consumer to access the media, he needs to decrypt the url and use it. Once paid for a particular media, a buy option should not appear for the consumer anymore, for that media.
 
-**More about this soon**
+**When creator creates a media, its url is encrypted using creators public key. When any consumer buys a media, an event gets fired which will invoke a listener in creator's account, listener will first decrypt the stored url using his own private key and then encrypt using buyers public key (which is publicly available to all) and then store it in media's mapping (this can only be done by that media's creator and that url is accessible to only buyer). We are using "bitcore-lib" library to generate public from private keys and "bitcore-ecies" to encrypt and decrypt url."**
 
 6.The revenue obtained from the media license (by the creator) should be divided among other stakeholders(eg. Production company) of the media. (Number of stakeholders can range from 0 to maximum of 5). The creator should be able to specify the stakeholders and corresponding share of each stakeholder while creating the media entry. The division of revenue (generated from each media license buying / selling) among the stakeholders should happen on-chain by a contract function.
 
