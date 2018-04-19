@@ -49,10 +49,10 @@ contract Spotify
 	mapping (address => personalInfo) public personalInfoList;	// mapping of personalInfo struct which stores type of customer and list of her purchased media 
 	mapping (bytes32 => uint) public indexOfMedia;	// index of a Media in the List
 	mapping (bytes32 => bool) public doesMediaExists;
-	mapping (address => bytes32) public publicKeyHash;	// hash for getting publicKeyHash from address of a person
+	mapping (address => string) public publicKeyHash;	// hash for getting publicKeyHash from address of a person
 	
 
-	function addMyPublicKey(bytes32 myPubKey) public 
+	function addMyPublicKey(string myPubKey) public 
 	{
 		publicKeyHash[msg.sender]=myPubKey;
 	}
@@ -191,7 +191,7 @@ contract Spotify
   		mediaList[mediaIndex].stakeHolders[0].transfer(moneyLeft);
   	}
 
-  	function getPublicKey(address currAddr) view public returns (bytes32)
+  	function getPublicKey(address currAddr) view public returns (string)
 	{
 		return publicKeyHash[currAddr];
 	}
