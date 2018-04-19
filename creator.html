@@ -11,29 +11,35 @@
 	<script src="scripts/index.js"></script>
 	<script>
 		$(document).ready(function() {
-			$("#CR_user_num").text(window.location.search.substr(6));
+			currentAccount = parseInt(window.location.search.substr(6)) - 1;
+			var acc_type = contractInstance.getPersonalInformation({from:web3.eth.accounts[currentAccount],gas:900000})[0]['c'][0];
+			if(acc_type=='3')
+				$("#CR_user_num").text("Creator " + (currentAccount+1));
+			else
+				alert("Invalid User.");
 		});
 		connect();
 		
 		
 		window.onload = function () { 
-			display_information(parseInt(window.location.search.substr(6)));
+			display_information();
 		}
 	</script>
   
 </head>
 <body class="container">
 	<div id="creator_body">
-		<h3><b>Creator <label id="CR_user_num">null</label></b></h3>
+		<h3><b><label id="CR_user_num">null</label></b></h3>
 		<span id="logged_in"></span><br /><br />
 		<h4><b>Account Information:</label></b></h3>
-		Balance: <span id="balance"></span><br />
-		Media created: <span id="media_data">None</span>
-		<br /><br />
+		<b>Balance:</b> <span id="balance"></span><br />
+		<b>Media created:</b> <span id="media_data">None</span>
+		<br />
 		<div>
 			<h4><b>Create Media:</b></h4>
 			<div>
 				<b>Name: </b><input type="text" placeholder="Media Name" id="media_name"><br>
+				<b>Url: </b><input type="text" placeholder="url" id="url"><br>
 				<b>Individual Cost: </b><input type="text" placeholder="Amount" id="indiv_cost"><br>
 				<b>Company Cost: </b><input type="text" placeholder="Amount" id="company_cost">
 			</div>
