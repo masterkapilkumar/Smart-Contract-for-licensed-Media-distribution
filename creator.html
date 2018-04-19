@@ -7,7 +7,10 @@
 
 	<script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
+	<script src="scripts/bitcore-lib.js"></script>
+	<script src="scripts/bitcore-ecies.js"></script>
+	
 	<script src="scripts/index.js"></script>
 	<script>
 		$(document).ready(function() {
@@ -23,6 +26,7 @@
 		
 		window.onload = function () { 
 			display_information();
+			initListeners();
 		}
 	</script>
   
